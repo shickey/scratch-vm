@@ -1,6 +1,4 @@
-// const MathUtil = require('../util/math-util');
-// const Cast = require('../util/cast');
-// const Clone = require('../util/clone');
+const uid = require('../util/uid');
 
 class Scratch3VideoBlocks {
     constructor (runtime) {
@@ -9,6 +7,16 @@ class Scratch3VideoBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
+
+        /**
+         * Maps each video playback promise to a unique ID
+         * so that they can be accessed from outside JS
+         */
+        this.videoPromiseRegistry = {};
+
+        window.resolveVideoPromise = (resolveId) => {
+            this.videoPromiseRegistry[resolveId]();
+        }
     }
 
     /**
@@ -30,6 +38,22 @@ class Scratch3VideoBlocks {
         // }
 
         console.log("playing video");
+
+        return new Promise( resolve => {
+            // Store the resolve id so that we can call
+            // it from outside JS
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            console.log(resolveId);
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'startPlayback',
+                    args: [],
+                    resolveId: resolveId
+                });
+            }
+        });
 
         // Start video and begin timer
         // if (!util.stackFrame.timer) {
