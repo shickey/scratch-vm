@@ -17,11 +17,11 @@ class Scratch3VideoBlocks {
      */
     getPrimitives () {
         return {
-            video_playuntildone: this.playVideoAndWait
+            video_playuntildone: this.playVideoUntilDone
         };
     }
 
-    playVideoAndWait (args, util) {
+    playVideoUntilDone (args, util) {
         // const index = this._getSoundIndex(args.SOUND_MENU, util);
         // if (index >= 0) {
         //     const soundId = util.target.sprite.sounds[index].soundId;
@@ -32,33 +32,33 @@ class Scratch3VideoBlocks {
         console.log("playing video");
 
         // Start video and begin timer
-        if (!util.stackFrame.timer) {
-            // If extension interface is available, send video start command
-            if (typeof window.ext !== 'undefined') {
-                window.ext.postMessage({
-                    extension: 'video',
-                    method: 'startPlayback',
-                    args: []
-                });
-            }
+        // if (!util.stackFrame.timer) {
+        //     // If extension interface is available, send video start command
+        //     if (typeof window.ext !== 'undefined') {
+        //         window.ext.postMessage({
+        //             extension: 'video',
+        //             method: 'startPlayback',
+        //             args: []
+        //         });
+        //     }
 
-            // Yield
-            util.stackFrame.timer = new Timer();
-            util.stackFrame.timer.start();
-            util.yield();
-        } else {
-            if (util.stackFrame.timer.timeElapsed() < 1000 * durationSeconds) {
-                util.yield();
-            } else {
-                if (typeof window.ext !== 'undefined') {
-                    window.ext.postMessage({
-                        extension: 'video',
-                        method: 'stopPlayback',
-                        args: []
-                    });
-                }
-            }
-        }
+        //     // Yield
+        //     util.stackFrame.timer = new Timer();
+        //     util.stackFrame.timer.start();
+        //     util.yield();
+        // } else {
+        //     if (util.stackFrame.timer.timeElapsed() < 1000 * durationSeconds) {
+        //         util.yield();
+        //     } else {
+        //         if (typeof window.ext !== 'undefined') {
+        //             window.ext.postMessage({
+        //                 extension: 'video',
+        //                 method: 'stopPlayback',
+        //                 args: []
+        //             });
+        //         }
+        //     }
+        // }
     }
 
     stopAllVideos () {
@@ -71,4 +71,4 @@ class Scratch3VideoBlocks {
 
 }
 
-module.exports = Scratch3SoundBlocks;
+module.exports = Scratch3VideoBlocks;
