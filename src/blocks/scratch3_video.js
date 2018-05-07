@@ -26,7 +26,12 @@ class Scratch3VideoBlocks {
     getPrimitives () {
         return {
             video_playuntildone: this.playVideoUntilDone,
-            video_start: this.startVideo
+            video_start: this.startVideo,
+            video_rotaterightby: this.rotateRightBy,
+            video_rotateleftby: this.rotateLeftBy,
+            video_setrotation: this.setRotation,
+            video_changesizeby: this.changeSizeBy,
+            video_setsize: this.setSize
         };
     }
 
@@ -66,14 +71,79 @@ class Scratch3VideoBlocks {
         });
     }
 
+    rotateRightBy (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'rotateRightBy',
+                    degrees: +(args.DEGREES),
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
 
+    rotateLeftBy (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'rotateLeftBy',
+                    degrees: +(args.DEGREES),
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
 
-    stopAllVideos () {
-        // if (this.runtime.targets === null) return;
-        // const allTargets = this.runtime.targets;
-        // for (let i = 0; i < allTargets.length; i++) {
-        //     this._stopAllSoundsForTarget(allTargets[i]);
-        // }
+    setRotation (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'setRotation',
+                    degrees: +(args.DEGREES),
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
+
+    changeSizeBy (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'changeSizeBy',
+                    percentage: +(args.PERCENTAGE),
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
+
+    setSize (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'setSize',
+                    percentage: +(args.PERCENTAGE),
+                    resolveId: resolveId
+                });
+            }
+        });
     }
 
 }
