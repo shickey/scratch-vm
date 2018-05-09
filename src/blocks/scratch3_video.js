@@ -31,7 +31,10 @@ class Scratch3VideoBlocks {
             video_rotateleftby: this.rotateLeftBy,
             video_setrotation: this.setRotation,
             video_changesizeby: this.changeSizeBy,
-            video_setsize: this.setSize
+            video_setsize: this.setSize,
+            video_changeeffectby: this.changeEffectBy,
+            video_seteffectto: this.setEffectTo,
+            video_clearvideoeffects: this.clearVideoEffects
         };
     }
 
@@ -145,6 +148,53 @@ class Scratch3VideoBlocks {
             }
         });
     }
+
+    changeEffectBy (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'changeEffectBy',
+                    effect: args.EFFECT,
+                    change: +(args.CHANGE),
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
+
+    setEffectTo (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'setEffectTo',
+                    effect: args.EFFECT,
+                    value: +(args.VALUE),
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
+
+    clearVideoEffects (args, util) {
+        return new Promise( resolve => {
+            var resolveId = uid();
+            this.videoPromiseRegistry[resolveId] = resolve;
+            if (typeof window.ext !== 'undefined') {
+                window.ext.postMessage({
+                    extension: 'video',
+                    method: 'clearVideoEffects',
+                    resolveId: resolveId
+                });
+            }
+        });
+    }
+
 
 }
 
