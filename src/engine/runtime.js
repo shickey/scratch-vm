@@ -855,6 +855,12 @@ class Runtime extends EventEmitter {
             this._fillExtensionCategory(categoryInfo, extensionInfo);
 
             this.emit(Runtime.BLOCKSINFO_UPDATE, categoryInfo);
+
+            this.flyoutBlocks.resetCache();
+            this.monitorBlocks.resetCache();
+            this.targets.forEach(target => {
+                target.blocks.resetCache();
+            });
         }
     }
 
