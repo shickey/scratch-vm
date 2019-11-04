@@ -164,6 +164,26 @@ class ExtensionManager {
         });
     }
 
+    reloadExtensionURL (id, extensionURL) {
+        return new Promise((resolve, reject) => {
+            const ExtensionWorker = require('worker-loader?name=extension-worker.js!./extension-worker');
+
+            this.pendingExtensions.push({extensionURL, resolve, reject, existingId: id});
+            dispatch.addWorker(new ExtensionWorker());
+        });
+    }
+
+    refreshExtensionService (serviceName) {
+        dispatch.call(serviceName, 'getInfo')
+            .then(info => {
+                info = this._prepareExtensionInfo(serviceName, info);
+                dispatch.call('runtime', '_refreshExtensionPrimitives', info);
+            })
+            .catch(e => {
+                log.error(`Failed to refresh built-in extension primitives: ${JSON.stringify(e)}`);
+            });
+    }
+
     /**
      * Regenerate blockinfo for any loaded extensions
      * @returns {Promise} resolved once all the extensions have been reinitialized
@@ -185,8 +205,12 @@ class ExtensionManager {
     allocateWorker () {
         const id = this.nextExtensionWorker++;
         const workerInfo = this.pendingExtensions.shift();
+        var existingId = undefined;
         this.pendingWorkers[id] = workerInfo;
-        return [id, workerInfo.extensionURL];
+        if (workerInfo.hasOwnProperty('existingId')) {
+            existingId = workerInfo.existingId;
+        }
+        return [id, workerInfo.extensionURL, existingId];
     }
 
     /**
@@ -411,7 +435,7 @@ class ExtensionManager {
             const callBlockFunc = (() => {
                 if (dispatch._isRemoteService(serviceName)) {
                     return (args, util, realBlockInfo) =>
-                        dispatch.call(serviceName, funcName, args, realBlockInfo);
+                        dispatch.call(serviceName, funcName, args);
                 }
 
                 // avoid promise latency if we can call direct

@@ -13,8 +13,9 @@ class ExtensionWorker {
 
         dispatch.waitForConnection.then(() => {
             dispatch.call('extensions', 'allocateWorker').then(x => {
-                const [id, extension] = x;
+                const [id, extension, existingId] = x;
                 this.workerId = id;
+                this.existingId = existingId;
 
                 try {
                     importScripts(extension);
@@ -35,9 +36,16 @@ class ExtensionWorker {
     register (extensionObject) {
         const extensionId = this.nextExtensionId++;
         this.extensions.push(extensionObject);
-        const serviceName = `extension.${this.workerId}.${extensionId}`;
+        var serviceName = `extension.${!!this.existingId ? this.existingId : this.workerId}.${extensionId}`;
         const promise = dispatch.setService(serviceName, extensionObject)
-            .then(() => dispatch.call('extensions', 'registerExtensionService', serviceName));
+            .then(() => {
+                if (this.existingId !== undefined) {
+                    dispatch.call('extensions', 'refreshExtensionService', serviceName);
+                }
+                else {
+                    dispatch.call('extensions', 'registerExtensionService', serviceName);
+                }
+            });
         if (this.initialRegistrations) {
             this.initialRegistrations.push(promise);
         }
