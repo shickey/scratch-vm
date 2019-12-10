@@ -392,6 +392,8 @@ class Runtime extends EventEmitter {
          * @type {function}
          */
         this.removeCloudVariable = this._initializeRemoveCloudVariable(newCloudDataManager);
+        
+        this.editingExtensionInfo = null;
     }
 
     /**
@@ -2583,6 +2585,10 @@ class Runtime extends EventEmitter {
      */
     updateCurrentMSecs () {
         this.currentMSecs = Date.now();
+    }
+    
+    setEditingExtensionInfo(extensionInfo) {
+        this.editingExtensionInfo = extensionInfo;
     }
 }
 

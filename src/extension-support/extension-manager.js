@@ -229,6 +229,9 @@ class ExtensionManager {
     registerExtensionService (serviceName) {
         dispatch.call(serviceName, 'getInfo').then(info => {
             this._registerExtensionInfo(serviceName, info);
+        })
+        .then(() => {
+            this.runtime.requestBlocksUpdate();
         });
     }
 

@@ -552,6 +552,14 @@ const serialize = function (runtime, targetId) {
 
     // Assemble extension list
     obj.extensions = Array.from(extensions);
+    
+    if (runtime.editingExtensionInfo !== null) {
+        obj.extensionInfo = {};
+        obj.extensionInfo[runtime.editingExtensionInfo.id] = {
+            url: runtime.editingExtensionInfo.url,
+            raw: runtime.editingExtensionInfo.raw
+        }
+    }
 
     // Assemble metadata
     const meta = Object.create(null);
@@ -1216,7 +1224,21 @@ const deserialize = function (json, runtime, zip, isSingleSprite) {
         extensionIDs: new Set(),
         extensionURLs: new Map()
     };
-
+    
+    if (!!json.extensionInfo) {
+        Object.entries(json.extensionInfo).forEach(([extensionId, extensionData]) => {
+            extensions.extensionURLs.set(extensionId, extensionData.url);
+            runtime.setEditingExtensionInfo({
+                id: extensionId,
+                url: extensionData.url,
+                raw: extensionData.raw
+            });
+        })
+    }
+    else {
+        runtime.setEditingExtensionInfo(null);
+    }
+    
     // First keep track of the current target order in the json,
     // then sort by the layer order property before parsing the targets
     // so that their corresponding render drawables can be created in
