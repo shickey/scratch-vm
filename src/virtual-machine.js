@@ -56,6 +56,8 @@ class VirtualMachine extends EventEmitter {
             log.error(`Failed to register runtime service: ${JSON.stringify(e)}`);
         });
 
+        this.startWebSocketServer();
+
         /**
          * The "currently editing"/selected target ID for the VM.
          * Block events from any Blockly workspace are routed to this target.
@@ -163,6 +165,33 @@ class VirtualMachine extends EventEmitter {
         this.flyoutBlockListener = this.flyoutBlockListener.bind(this);
         this.monitorBlockListener = this.monitorBlockListener.bind(this);
         this.variableListener = this.variableListener.bind(this);
+    }
+
+    startWebSocketServer () {
+        this.socket = new WebSocket('ws://localhost:8081');
+        this.socket.addEventListener('open', (event) => {
+            console.log('Connected to WebSocket server');
+        });
+        this.socket.addEventListener('message', (event) => {
+            // const data = JSON.parse(event.data);
+            new Response(event.data).arrayBuffer()
+            .then((buf) => {
+                this.addSprite(new Uint8Array(buf))
+                .then(() => {
+                    this.greenFlag();
+                    // this.runtime.targets.forEach((target) => {
+                        // if (target.sprite.name !== data.name) return;
+                        // console.log(target);
+                    // });
+                });
+            });
+        });
+        this.socket.addEventListener('close', (event) => {
+            setTimeout(() => {
+                this.startWebSocketServer();
+            }, 1000);
+        });
+
     }
 
     /**
