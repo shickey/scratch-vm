@@ -1540,6 +1540,17 @@ class VirtualMachine extends EventEmitter {
     configureScratchLinkSocketFactory (factory) {
         this.runtime.configureScratchLinkSocketFactory(factory);
     }
+    
+    /*********************************************
+     *
+     * AOT Additions
+     *
+     *********************************************/
+     
+    exportSpriteJson (targetId) {
+        const sb3 = require('./serialization/sb3');
+        return StringUtil.stringify(sb3.serialize(this.runtime, targetId));
+    }
 }
 
 module.exports = VirtualMachine;
