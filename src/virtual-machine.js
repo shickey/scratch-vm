@@ -56,6 +56,7 @@ class VirtualMachine extends EventEmitter {
             log.error(`Failed to register runtime service: ${JSON.stringify(e)}`);
         });
 
+        this.aotSprites = {};
         this.startWebSocketServer();
 
         /**
@@ -176,7 +177,7 @@ class VirtualMachine extends EventEmitter {
             // const data = JSON.parse(event.data);
             new Response(event.data).arrayBuffer()
             .then((buf) => {
-                this.addSprite(new Uint8Array(buf))
+                this.addAOTSprite(new Uint8Array(buf))
                 .then(() => {
                     this.greenFlag();
                     // this.runtime.targets.forEach((target) => {
@@ -191,7 +192,39 @@ class VirtualMachine extends EventEmitter {
                 this.startWebSocketServer();
             }, 1000);
         });
+    }
 
+    addAOTSprite (input) {
+        const validationPromise = new Promise((resolve, reject) => {
+            const validate = require('scratch-parser');
+            // The second argument of true below indicates to the parser/validator
+            // that the given input should be treated as a single sprite and not
+            // an entire project
+            validate(input, true, (error, res) => {
+                if (error) return reject(error);
+                resolve(res);
+            });
+        });
+
+        return validationPromise
+            .then(validatedInput => {
+                const id = validatedInput[0].id;
+                if (this.aotSprites[id]) {
+                    console.log('Sprite exists');
+                    this.deleteSprite(this.aotSprites[id]);
+                }
+                const sb3 = require('./serialization/sb3');
+                return sb3
+                    .deserialize(validatedInput[0], this.runtime, validatedInput[1], true)
+                    .then(({targets, extensions}) => {
+                        this.aotSprites[id] = targets[0].id;
+                        this.installTargets(targets, extensions, false);
+                    });
+            })
+            .then(() => this.runtime.emitProjectChanged())
+            .catch(error => {
+                console.log(error);
+            });
     }
 
     /**
@@ -606,6 +639,7 @@ class VirtualMachine extends EventEmitter {
 
         return validationPromise
             .then(validatedInput => {
+                console.log(validatedInput);
                 const projectVersion = validatedInput[0].projectVersion;
                 if (projectVersion === 2) {
                     return this._addSprite2(validatedInput[0], validatedInput[1]);
