@@ -423,19 +423,25 @@ class VirtualMachine extends EventEmitter {
      * @return {object} A generated zip of the sprite and its assets in the format
      * specified by optZipType or blob by default.
      */
-    exportSprite (targetId, optZipType) {
+    exportSprite (targetId, options) {
         const sb3 = require('./serialization/sb3');
 
         const soundDescs = serializeSounds(this.runtime, targetId);
         const costumeDescs = serializeCostumes(this.runtime, targetId);
-        const spriteJson = StringUtil.stringify(sb3.serialize(this.runtime, targetId));
+        const serializedSprite = sb3.serialize(this.runtime, targetId);
+        console.log("SERIALIZED SPRITE");
+        console.log(serializedSprite);
+        if (options && typeof options.iosId === 'string') {
+            serializedSprite.id = options.iosId
+        }
+        const spriteJson = StringUtil.stringify(serializedSprite);
 
         const zip = new JSZip();
         zip.file('sprite.json', spriteJson);
         this._addFileDescsToZip(soundDescs.concat(costumeDescs), zip);
 
         return zip.generateAsync({
-            type: typeof optZipType === 'string' ? optZipType : 'blob',
+            type: (options && typeof options.optZipType) === 'string' ? options.optZipType : 'blob',
             mimeType: 'application/x.scratch.sprite3',
             compression: 'DEFLATE',
             compressionOptions: {
