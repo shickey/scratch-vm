@@ -52,6 +52,7 @@ class Scratch3SensingBlocks {
      */
     getPrimitives () {
         return {
+            sensing_whentouchingobject: this.touchingObject,
             sensing_touchingobject: this.touchingObject,
             sensing_touchingcolor: this.touchingColor,
             sensing_coloristouchingcolor: this.colorTouchingColor,
@@ -72,6 +73,15 @@ class Scratch3SensingBlocks {
             sensing_answer: this.getAnswer,
             sensing_username: this.getUsername,
             sensing_userid: () => {} // legacy no-op block
+        };
+    }
+    
+    getHats () {
+        return {
+            sensing_whentouchingobject: {
+                restartExistingThreads: false,
+                               edgeActivated: true
+            }
         };
     }
 

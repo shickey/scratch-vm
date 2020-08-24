@@ -179,7 +179,7 @@ class VirtualMachine extends EventEmitter {
             .then((buf) => {
                 this.addAOTSprite(new Uint8Array(buf))
                 .then(() => {
-                    this.greenFlag();
+                    // this.greenFlag();
                     // this.runtime.targets.forEach((target) => {
                         // if (target.sprite.name !== data.name) return;
                         // console.log(target);
@@ -218,7 +218,12 @@ class VirtualMachine extends EventEmitter {
                     .deserialize(validatedInput[0], this.runtime, validatedInput[1], true)
                     .then(({targets, extensions}) => {
                         this.aotSprites[id] = targets[0].id;
-                        this.installTargets(targets, extensions, false);
+                        this.installTargets(targets, extensions, false)
+                        .then(() => {
+                            targets.forEach(target => {
+                                this.runtime.startHats('event_whenflagclicked', {}, target);
+                            });
+                        });
                     });
             })
             .then(() => this.runtime.emitProjectChanged())
@@ -639,7 +644,6 @@ class VirtualMachine extends EventEmitter {
 
         return validationPromise
             .then(validatedInput => {
-                console.log(validatedInput);
                 const projectVersion = validatedInput[0].projectVersion;
                 if (projectVersion === 2) {
                     return this._addSprite2(validatedInput[0], validatedInput[1]);
