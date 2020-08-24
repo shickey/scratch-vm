@@ -782,6 +782,12 @@ class RenderedTarget extends Target {
             return this.isTouchingPoint(mouseX, mouseY);
         } else if (requestedObject === '_edge_') {
             return this.isTouchingEdge();
+        } else if (requestedObject === '_any_') {
+            return this.runtime.targets.some(target => {
+                if (target.sprite.name === this.sprite.name ||
+                    target.sprite.name === 'Stage') return false;
+                return this.isTouchingSprite(target.sprite.name);
+            });
         }
         return this.isTouchingSprite(requestedObject);
     }
